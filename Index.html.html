@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>육하원칙 배우기</title>
+
+    <!-- Google Fonts: Jua & Nanum Gothic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- html2canvas and jsPDF for printable worksheets & card export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        where: {
+                            light: '#E0F2FE',
+                            border: '#0284C7',
+                            tab: '#0EA5E9',
+                            text: '#0369A1'
+                        },
+                        who: {
+                            light: '#FEF3C7',
+                            border: '#D97706',
+                            tab: '#F59E0B',
+                            text: '#B45309'
+                        },
+                        what: {
+                            light: '#FCE7F3',
+                            border: '#DB2777',
+                            tab: '#EC4899',
+                            text: '#BE185D'
+                        }
+                    },
+                    fontFamily: {
+                        jua: ['Jua', 'sans-serif'],
+                        sans: ['Nanum Gothic', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Jua', 'Nanum Gothic', sans-serif;
+            background-color: #F8FAFC;
+            background-image: radial-gradient(#CBD5E1 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Large Accessible Custom Scrollbar for Classroom Screens */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 24px;
+            height: 24px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #E2E8F0;
+            border-radius: 12px;
+            margin: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #64748B;
+            border-radius: 12px;
+            border: 4px solid #E2E8F0;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+
+        /* Card drop transition */
+        .card-placed {
+            animation: popCard 0.25s ease-out;
+        }
+
+        @keyframes popCard {
+            0% { transform: scale(0.9); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* 1:1 Aspect Ratio for top combined boxes, and fixed 140px for bottom card boxes */
+        .print-combined-box {
+            width: 100% !important;
+            aspect-ratio: 1 / 1 !important;
+            position: relative;
+        }
+
+        .print-card-box {
+            width: 140px !important;
+            height: 140px !important;
+            aspect-ratio: 1 / 1 !important;
+            position: relative;
+            margin: 0 auto !important;
+        }
+
+        .print-card-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+        }
+
+        /* Print Style rules for A4 sheet */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 6mm 8mm;
+            }
+            body * {
+                visibility: hidden !important;
+            }
+            #printArea, #printArea * {
+                visibility: visible !important;
+            }
+            #printArea {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            /* Force 3 columns in print mode */
+            .print-grid-3 {
+                display: grid !important;
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+            }
+            /* Maintain top combined 1:1 ratio, fixed 140px for bottom cards */
+            .print-combined-box {
+                width: 100% !important;
+                aspect-ratio: 1 / 1 !important;
+                height: auto !important;
+                max-height: none !important;
+            }
+            .print-card-box {
+                width: 140px !important;
+                height: 140px !important;
+                max-width: 140px !important;
+                max-height: 140px !important;
+                aspect-ratio: 1 / 1 !important;
+                margin: 0 auto !important;
+            }
+            .print-card-img {
+                width: 100% !important;
+                height: 100% !important;
+                max-height: 100% !important;
+                max-width: 100% !important;
+                object-fit: contain !important;
+            }
+            .print-task-box {
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-5 text-slate-800 relative">
+
+    <!-- TOP UTILITY BAR (Replaces floating button to prevent overlap) -->
+    <div class="w-full max-w-6xl mx-auto flex justify-between items-center mb-3 px-1">
+        <div class="flex items-center gap-2">
+            <span class="text-lg sm:text-2xl font-jua text-indigo-900 tracking-wide">🌟 육하원칙 문장 놀이터</span>
+            <span class="hidden sm:inline-block px-2.5 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-sans font-bold rounded-full">어디서 · 누가 · 무엇을</span>
+        </div>
+        <button onclick="openPdfModal()" class="text-xs sm:text-sm font-sans font-bold bg-white hover:bg-slate-50 text-indigo-700 hover:text-indigo-900 px-3.5 py-2 rounded-xl border border-indigo-200 shadow-xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95">
+            <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            <span>PDF 학습지 인쇄</span>
+        </button>
+    </div>
+
+    <header id="topHeader" class="w-full max-w-6xl mx-auto bg-white rounded-3xl shadow-md border border-slate-200 p-4 sm:p-6 mb-4 relative flex flex-col justify-between min-h-[220px]">
+        <!-- Top large interactive date display -->
+        <div class="flex-[2] flex flex-col items-center justify-center py-6 bg-amber-50/80 border-2 border-amber-300 rounded-2xl shadow-xs">
+            <div id="dateTextDisplay" class="flex items-center justify-center gap-2 sm:gap-4 font-jua text-amber-950 font-bold tracking-wider text-center flex-wrap">
+                <!-- Dynamic Date string placed by JavaScript -->
+            </div>
+            <p class="text-xs sm:text-sm font-sans font-medium text-amber-700/80 mt-3">네모 상자를 클릭하면 해당 칸이 열리거나 닫힙니다.</p>
+        </div>
+
+        <!-- Weekly calendar display -->
+        <div class="flex-1 w-full mt-3 font-sans">
+            <div id="calendarGrid" class="grid grid-cols-7 gap-1.5 sm:gap-3 text-center">
+                <!-- Days Sun ~ Sat injected dynamically via JavaScript -->
+            </div>
+        </div>
+    </header>
+
+    <main class="w-full max-w-6xl mx-auto flex-1 flex flex-col justify-between">
+        
+        <!-- VIEW 1: START SCREEN (INITIAL VIEW) -->
+        <div id="startScreen" class="flex-1 flex flex-col items-center justify-center py-8 sm:py-12 bg-white rounded-3xl border border-slate-200 shadow-md p-6 text-center my-auto min-h-[260px]">
+            <div class="mb-4">
+                <span class="inline-block px-4 py-1.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-sm sm:text-base rounded-full font-sans font-bold">
+                    재미있는 문장 만들기 놀이
+                </span>
+            </div>
+            <h1 class="text-2xl sm:text-4xl font-jua text-slate-800 mb-6">
+                육하원칙 카드를 골라 문장을 완성해 볼까요?
+            </h1>
+            <button onclick="startLearningView()" class="group relative inline-flex items-center justify-center px-8 py-4 sm:py-5 text-xl sm:text-2xl font-jua text-white bg-indigo-600 hover:bg-indigo-700 active:scale-95 rounded-2xl shadow-lg transition-all duration-200 border-b-4 border-indigo-900 cursor-pointer">
+                <svg class="w-6 h-6 sm:w-7 sm:h-7 mr-2.5 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                오늘의 학습 시작하기
+            </button>
+        </div>
+
+        <div id="learningScreen" class="hidden flex-1 flex flex-col justify-between gap-4">
+            
+            <!-- Learning View Toolbar -->
+            <div class="flex justify-between items-center bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-2xs">
+                <button onclick="goBackToStart()" class="text-sm sm:text-base font-sans font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-4 py-2 rounded-xl transition flex items-center gap-1 cursor-pointer">
+                    ← 처음으로
+                </button>
+                <span class="font-jua text-lg sm:text-xl text-indigo-900">카드를 눌러 문장을 완성해 보세요</span>
+                
+                <!-- Combine View Toggle -->
+                <button id="combineToggleBtn" onclick="toggleCombinedView()" class="text-xs sm:text-sm font-sans font-bold bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl transition shadow-xs flex items-center gap-1 cursor-pointer">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <span id="combineToggleText">합쳐서 보기</span>
+                </button>
+            </div>
+
+            <section id="separateSlotsContainer" class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+                
+                <!-- Slot 1: 어디서 (Where) -->
+                <div id="slot-where" onclick="clearSlot('where')" class="bg-where-light border-4 border-dashed border-where-border rounded-2xl p-3 sm:p-4 text-center min-h-[240px] sm:min-h-[270px] flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-sky-100/80 shadow-xs relative group" title="클릭하면 비웁니다">
+                    <span class="text-sm font-sans font-bold text-where-text mb-1 bg-white/90 px-3 py-0.5 rounded-full border border-sky-200">어디서</span>
+                    <div id="text-where" class="text-2xl sm:text-3xl font-jua text-where-text">
+                        [ 어디서 ]
+                    </div>
+                </div>
+
+                <!-- Slot 2: 누가 (Who) -->
+                <div id="slot-who" onclick="clearSlot('who')" class="bg-who-light border-4 border-dashed border-who-border rounded-2xl p-3 sm:p-4 text-center min-h-[240px] sm:min-h-[270px] flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-amber-100/80 shadow-xs relative group" title="클릭하면 비웁니다">
+                    <span class="text-sm font-sans font-bold text-who-text mb-1 bg-white/90 px-3 py-0.5 rounded-full border border-amber-200">누가</span>
+                    <div id="text-who" class="text-2xl sm:text-3xl font-jua text-who-text">
+                        [ 누가 ]
+                    </div>
+                </div>
+
+                <!-- Slot 3: 무엇을 (What) -->
+                <div id="slot-what" onclick="clearSlot('what')" class="bg-what-light border-4 border-dashed border-what-border rounded-2xl p-3 sm:p-4 text-center min-h-[240px] sm:min-h-[270px] flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-pink-100/80 shadow-xs relative group" title="클릭하면 비웁니다">
+                    <span class="text-sm font-sans font-bold text-what-text mb-1 bg-white/90 px-3 py-0.5 rounded-full border border-pink-200">무엇을</span>
+                    <div id="text-what" class="text-2xl sm:text-3xl font-jua text-what-text">
+                        [ 무엇을 ]
+                    </div>
+                </div>
+
+            </section>
+
+            <section id="combinedSlotContainer" class="hidden bg-white border-4 border-amber-400 rounded-3xl p-4 text-center min-h-[460px] flex flex-col items-center justify-center shadow-lg relative overflow-hidden">
+                <div id="combinedContent" class="w-full h-full flex flex-col items-center justify-center">
+                    <!-- Layered Combined Display generated via JavaScript -->
+                </div>
+            </section>
+
+            <section class="bg-white rounded-2xl p-3 sm:p-5 border border-slate-200 shadow-md flex-1 flex flex-col justify-between">
+                
+                <!-- Category Tabs -->
+                <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-3">
+                    <button id="tab-where" onclick="selectCategory('where')" class="py-3 sm:py-4 rounded-xl text-xl sm:text-2xl font-jua text-white bg-where-tab border-b-4 border-sky-700 shadow-xs transition-all transform active:scale-95 cursor-pointer">
+                        어디서
+                    </button>
+                    <button id="tab-who" onclick="selectCategory('who')" class="py-3 sm:py-4 rounded-xl text-xl sm:text-2xl font-jua text-white bg-who-tab border-b-4 border-amber-700 shadow-xs transition-all opacity-60 transform active:scale-95 cursor-pointer">
+                        누가
+                    </button>
+                    <button id="tab-what" onclick="selectCategory('what')" class="py-3 sm:py-4 rounded-xl text-xl sm:text-2xl font-jua text-white bg-what-tab border-b-4 border-pink-700 shadow-xs transition-all opacity-60 transform active:scale-95 cursor-pointer">
+                        무엇을
+                    </button>
+                </div>
+
+                <!-- Card Items Container -->
+                <div class="relative bg-slate-50 border-2 border-slate-200 rounded-xl p-3">
+                    <div id="cardList" class="custom-scrollbar overflow-y-auto max-h-[320px] sm:max-h-[400px] grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 pr-3">
+                        <!-- Dynamic cards loaded via JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mt-3 pt-3 border-t border-slate-100">
+                    <div class="flex items-center gap-2">
+                        <button onclick="resetAllSlots()" class="text-sm font-sans font-bold text-slate-500 hover:text-slate-800 px-3 py-2 rounded-lg border border-slate-300 hover:bg-slate-100 transition cursor-pointer">
+                            전체 새로고침
+                        </button>
+
+                        <!-- Combined PNG Image Download -->
+                        <button id="pngDownloadBtn" onclick="downloadCombinedImage()" class="text-sm font-jua bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95" title="합쳐진 그림만 PNG 파일로 저장합니다">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            <span>그림 PNG 저장</span>
+                        </button>
+                    </div>
+
+                    <!-- Sentence Preview & Voice Reader -->
+                    <div class="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-2xl px-4 py-2">
+                        <button id="speakerBtn" onclick="readCompletedSentence()" disabled class="p-2.5 bg-slate-200 text-slate-400 rounded-full transition shadow-xs flex items-center justify-center opacity-50 cursor-not-allowed" title="문장을 완성한 후 눌러 음성을 들어보세요">
+                            <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+                            </svg>
+                        </button>
+                        <span id="sentencePreview" class="text-lg sm:text-2xl font-jua text-slate-400 tracking-wide">
+                            [ 어디서 ] [ 누가 ] [ 무엇을 ]
+                        </span>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+    </main>
+
+    <div id="pdfModal" class="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 z-50 hidden">
+        <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto p-4 sm:p-6 shadow-2xl flex flex-col">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-200">
+                <h2 class="text-xl font-jua text-slate-800">A4 학습지 미리보기 및 인쇄</h2>
+                <div class="flex gap-2">
+                    <button onclick="triggerPrint()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-sans font-bold px-4 py-2 rounded-lg text-sm shadow transition cursor-pointer">
+                        프린트 / PDF 저장
+                    </button>
+                    <button onclick="closePdfModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-sans font-bold px-3 py-2 rounded-lg text-sm transition cursor-pointer">
+                        닫기
+                    </button>
+                </div>
+            </div>
+
+            <div id="printArea" class="bg-white p-3 sm:p-5 border border-slate-300 rounded-lg text-slate-900 font-sans mx-auto w-full">
+                <!-- Dynamic Worksheet Content (Top: 3 Combined Images, Bottom: 3 Matching Problems) -->
+                <div id="worksheetContent" class="space-y-3">
+                    <!-- Dynamic randomized practice prompts injected via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* State Variables */
+        let activeCategory = 'where';
+        let slots = {
+            where: null,
+            who: null,
+            what: null
+        };
+        let isCombinedView = false;
+
+        let dateState = {
+            month: false,
+            date: false,
+            day: false
+        };
+        let todayDateObj = new Date();
+
+        const WHAT_IMAGES = {
+            "나": {
+                "공던지기": "https://lh3.googleusercontent.com/d/1h599WCw8yVBf0HLd8w2Q783qScT0F6E-",
+                "공차기": "https://lh3.googleusercontent.com/d/15L-5qL7eUbuwM3Fngxn8PzJIftth4PNz",
+                "과자 먹기": "https://lh3.googleusercontent.com/d/1PgLHQK9GqHdP33-n1rz1yfiIuhBc3GQd",
+                "그림 그리기": "https://lh3.googleusercontent.com/d/1EIf6gKqeKVJfk7pAwjoYcfinRkoyF5za",
+                "노래 부르기": "https://lh3.googleusercontent.com/d/1CCkH7gvJioZxeqjLIA66S9djjkHbu8kR",
+                "물 마시기": "https://lh3.googleusercontent.com/d/10VRVEMsoAymL1lZgX7FC57itR-Nt0etk",
+                "밥 먹기": "https://lh3.googleusercontent.com/d/1hRKe0FkduMpUcco4KiL9IXV8nTatbqOo",
+                "손 씻기": "https://lh3.googleusercontent.com/d/1Z2drmZ1-yrqlPyDeICZc0m5ZCyC4pJ7u",
+                "양치하기": "https://lh3.googleusercontent.com/d/1ajyOjd71eOQHO9eOoKDpbGXIuuRO7Mb8",
+                "옷벗기": "https://lh3.googleusercontent.com/d/1od32XycKq09Frgz4b356QyG1kNc_3umA",
+                "옷입기": "https://lh3.googleusercontent.com/d/1cmekspSq04J7KpUIuMeOff74ZTkKIkYU",
+                "잠자기": "https://lh3.googleusercontent.com/d/1YpAo_ZryXE5dI_YJ6-f1rSvcQ9CNWJu1",
+                "장난감 정리": "https://lh3.googleusercontent.com/d/1CVCs-au-4jacimWqMa9ZB3e0Pn0TPScz",
+                "책읽기": "https://lh3.googleusercontent.com/d/163Ph0ZGMw-XMR1JAe7kOwpPhxhl-hCQd",
+                "트램펄린 타기": "https://lh3.googleusercontent.com/d/1oI2zBjKXrhknV7VahAKWHk_w5ISfzWiJ",
+                "쇼핑해요": "https://lh3.googleusercontent.com/d/1N0up28sHGZggP61LdFtftP3l86GlIxFY"
+            },
+            "동생": {
+                "공던지기": "https://lh3.googleusercontent.com/d/1mtcQEKcdN4aIGVPiXLn_eMfSjlktzFrT",
+                "공차기": "https://lh3.googleusercontent.com/d/1JvpfEzi_cox1SJ_cSTVviwbH2VZAFvu9",
+                "과자 먹기": "https://lh3.googleusercontent.com/d/1IwrBxaOs2FwQBUJ9eTW8MyBnCvZTB2cN",
+                "그림 그리기": "https://lh3.googleusercontent.com/d/1PT-47bueecnXF0IKmw7T2rySFBISHlYn",
+                "노래 부르기": "https://lh3.googleusercontent.com/d/1gwvkhI8S_D37s2SEM9XvW7gvqKnZZ7MJ",
+                "물 마시기": "https://lh3.googleusercontent.com/d/1f0BcaWz9h5KGNTbmg0h6ENrJC-FYX3-5",
+                "밥 먹기": "https://lh3.googleusercontent.com/d/1txEpn-vLv6QPxi8HRRxQdFrGzsd0xjqC",
+                "손 씻기": "https://lh3.googleusercontent.com/d/1cV1nbpAtqmC-0b-LaNqBJngc0NFxMgIe",
+                "양치하기": "https://lh3.googleusercontent.com/d/1RvmFj3Vnh3E4nx6_ZGymPuI0kqrHfFKR",
+                "옷벗기": "https://lh3.googleusercontent.com/d/1WyckpRkf6pbvWSuiqWlM0uzKJArXZV3x",
+                "옷입기": "https://lh3.googleusercontent.com/d/12n_UVaWnFX1OluYm2VFvns_DPf6oXRIm",
+                "잠자기": "https://lh3.googleusercontent.com/d/1ukd227BQdFejBmspY_xXZJ1mFc_ALzSg",
+                "장난감 정리": "https://lh3.googleusercontent.com/d/1xxhzgnzxEM8kqT7eQqLaQPCIX4S_m9fK",
+                "책읽기": "https://lh3.googleusercontent.com/d/1lYnRO3B1-TsvemKKm-BR6BM5ZqZOpbaX",
+                "트램펄린 타기": "https://lh3.googleusercontent.com/d/1NK0FXxHEol6kbjoJ_k5l_EEHKMvnrCmR",
+                "쇼핑해요": "https://lh3.googleusercontent.com/d/1t4nwy67MR7LRsqZvp6AK0GWQtVCId53s"
+            },
+            "아빠": {
+                "공던지기": "https://lh3.googleusercontent.com/d/1QBnVsteUQ5Id5rm_vgzMXCs_FoascAS8",
+                "공차기": "https://lh3.googleusercontent.com/d/1nQbvczN-cWacdQmelFP7Xw0rnJvo5i45",
+                "과자 먹기": "https://lh3.googleusercontent.com/d/1iqiPWHl4yJ9jivxy1aQXjk960uWDWoAT",
+                "그림 그리기": "https://lh3.googleusercontent.com/d/14CoYr9U1JIS3yruEOznocIr_YF1JTBAZ",
+                "노래 부르기": "https://lh3.googleusercontent.com/d/187-tnPC3WR9dWG0EiAL6hznvp-MuBoy_",
+                "물 마시기": "https://lh3.googleusercontent.com/d/1xSdGBfz0y7hdbeo-FzYy62kgPuF9d6GT",
+                "밥 먹기": "https://lh3.googleusercontent.com/d/18dKpIT1GaPXaE3Ubf3Jrjv8PFCYs53Uk",
+                "손 씻기": "https://lh3.googleusercontent.com/d/1DJG3GtYz0nUbmgqtoI_6VXsMRIOBV0rm",
+                "양치하기": "https://lh3.googleusercontent.com/d/1FsL5M9slwXclW6omSSHo1QQVl41q1gSz",
+                "옷벗기": "https://lh3.googleusercontent.com/d/14oSbrmjLvddp4YJTgPWBYxkVY9dNLPu4",
+                "옷입기": "https://lh3.googleusercontent.com/d/1ZMifgbYhZQcPEJur1SDNxxXKbROwOewN",
+                "잠자기": "https://lh3.googleusercontent.com/d/15Fy2_6jXu-buR7pa2QzXfvACOU2nvkoa",
+                "장난감 정리": "https://lh3.googleusercontent.com/d/10UT0HxOCComJN3ij83F0QRMT1xODW4N7",
+                "책읽기": "https://lh3.googleusercontent.com/d/1Av35Sa6Gut0Gdxr-5oZLdz2EkQos7vCK",
+                "트램펄린 타기": "https://lh3.googleusercontent.com/d/1dMqC3pbikXeZv3yY3hVa1LEUYBiptU7R",
+                "쇼핑해요": "https://lh3.googleusercontent.com/d/1K56DFnkiM-4rLCVgvQHEp2qTEx8-r8cI"
+            },
+            "엄마": {
+                "공던지기": "https://lh3.googleusercontent.com/d/1DgNTvO4yt_pl4gvuOY4JFaHW-q-feY9-",
+                "공차기": "https://lh3.googleusercontent.com/d/1AbmO_5uvD21wINIc_rKyb2NGhAqvgnvq",
+                "과자 먹기": "https://lh3.googleusercontent.com/d/1c7L1B982ys3IuCXFx-sMWAFqIeZf6tiE",
+                "그림 그리기": "https://lh3.googleusercontent.com/d/1OK1jdcgYlrklwl9arCtUeZA01R9HuhEg",
+                "노래 부르기": "https://lh3.googleusercontent.com/d/1BqCq4CI2wNCMaxg4ky2a-BTUyWYJVjmJ",
+                "물 마시기": "https://lh3.googleusercontent.com/d/1dify2_KncioPQkkRYwN3vLdx9cPwI5Ys",
+                "밥 먹기": "https://lh3.googleusercontent.com/d/1khG5JyF87XG_MNS-xz-BW_AXknPHKhL1",
+                "손 씻기": "https://lh3.googleusercontent.com/d/1L-jTH__854JZVl9A8L2_uP-NsMByl_jd",
+                "양치하기": "https://lh3.googleusercontent.com/d/1NO3Hu5r_5_gz2nWrm7Oyb31vbnhlA9j5",
+                "옷벗기": "https://lh3.googleusercontent.com/d/1gioshxLgIbESj1UFDHpy-yK0cQbEFI3-",
+                "옷입기": "https://lh3.googleusercontent.com/d/1Kb6ooTGyXRaJN3MLhk9_YE29NBFprFza",
+                "잠자기": "https://lh3.googleusercontent.com/d/1ToTKLlo3nBHsLVD8GGriR0IQqgLV8Cms",
+                "장난감 정리": "https://lh3.googleusercontent.com/d/1QfahgrBx4Q2xSwSqHJQIvOmwr04HVim-",
+                "책읽기": "https://lh3.googleusercontent.com/d/1eRQZvCXzNkfKO6x-fRcfbLROIx3rVpAL",
+                "트램펄린 타기": "https://lh3.googleusercontent.com/d/1UEHYOYQmsvJFWCtJVXuuksivqvJzhmwF",
+                "쇼핑해요": "https://lh3.googleusercontent.com/d/1keDBwSe_XR3e1qHB5CwjHIRhxEjBo9jc"
+            },
+            "할머니": {
+                "공던지기": "https://lh3.googleusercontent.com/d/1sEK0j47yzBDat-proOau-hZQAVAiAPc5",
+                "공차기": "https://lh3.googleusercontent.com/d/1NHSJ763UObJLcH4XCmXE0bwO0F5RAfkR",
+                "과자 먹기": "https://lh3.googleusercontent.com/d/1N_qi4lY3fhD3-f6AFBPm8CFSInuwKSlX",
+                "그림 그리기": "https://lh3.googleusercontent.com/d/1j2U5qe48VHdShHSKadOuQzbR84TQWwRP",
+                "노래 부르기": "https://lh3.googleusercontent.com/d/18XS0QqTnGkfVI94fIQrq-mGJD4idv8oh",
+                "물 마시기": "https://lh3.googleusercontent.com/d/1UW0DnNW5ZhEOcc7ehBC2KbcJfAxnNXv9",
+                "밥 먹기": "https://lh3.googleusercontent.com/d/1ov6dzPme0fRORN11587jha3ZsThEo74c",
+                "손 씻기": "https://lh3.googleusercontent.com/d/1wy7wQ5cBYV5h6euEK4d-Lnitc5S93Zip",
+                "양치하기": "https://lh3.googleusercontent.com/d/1-HNNYY8S4RoA7OgjLujsv4HEPsyKMxaU",
+                "옷벗기": "https://lh3.googleusercontent.com/d/1oXgvCkpEonGdgSROd_nuZaBM6BooVHcN",
+                "옷입기": "https://lh3.googleusercontent.com/d/1rzaPJL0Sa9vfypaPaQ5-VZsK9a62kLt5",
+                "잠자기": "https://lh3.googleusercontent.com/d/1d-8_9_iH4BnfF4QxcQvFQnAAPE88k371",
+                "장난감 정리": "https://lh3.googleusercontent.com/d/1YYIY9zcNIErsO7qJjkTbJHfs3BJqZAt0",
+                "책읽기": "https://lh3.googleusercontent.com/d/136Q0wzVIgM2ZwC88vGDSnoZ4LGSZkH7R",
+                "트램펄린 타기": "https://lh3.googleusercontent.com/d/1xhMtLAyS-Nd4qpfJomigRZs_-w45zYbK",
+                "쇼핑해요": "https://lh3.googleusercontent.com/d/1PexG_4usptGJ7kjLprKR4ihI-fPdGlH2"
+            },
+            "할아버지": {
+                "공던지기": "https://lh3.googleusercontent.com/d/1lR169arG6orro-iGtG8oAu9yJSXWJQlX",
+                "공차기": "https://lh3.googleusercontent.com/d/1f46NIg8bIPkQ4Cv9X6Zz3CxDo5TrzPrO",
+                "과자 먹기": "https://lh3.googleusercontent.com/d/1To1rxgDLr4DLLv2-uMvRyM2m1jmUz22E",
+                "그림 그리기": "https://lh3.googleusercontent.com/d/1h4u-DWDlBmpdbAFzRdaUNCu2bAF0FS-y",
+                "노래 부르기": "https://lh3.googleusercontent.com/d/1xjSoXlmMUx-u63hJsQN_D7TH3-3AZNy7",
+                "물 마시기": "https://lh3.googleusercontent.com/d/11g58oJxLrtMAVWbxLe4M1msJeJogxSsi",
+                "밥 먹기": "https://lh3.googleusercontent.com/d/1PScISIzd-EsS3KjmdMhSXlMGu9GkDVx8",
+                "손 씻기": "https://lh3.googleusercontent.com/d/1LZxwuwj1JYd7ixd01OayYOPxBxA7MvhY",
+                "양치하기": "https://lh3.googleusercontent.com/d/1ayhag5hcSwzLUalOpq8z06SXj8rd3jZ-",
+                "옷벗기": "https://lh3.googleusercontent.com/d/1pqMUxgwz--pOzN-_jg3JzLlwG5U0Tojm",
+                "옷입기": "https://lh3.googleusercontent.com/d/1X8A6Niqu2u-JmGmdi-QibqGtzVZqvILM",
+                "잠자기": "https://lh3.googleusercontent.com/d/1k5O10SIlkrSTJ05Cwy25XRaXmRJLbIod",
+                "장난감 정리": "https://lh3.googleusercontent.com/d/1BQaSJshbyVs0hRQoC-UuHEibpT5lzVPS",
+                "책읽기": "https://lh3.googleusercontent.com/d/1ecMV2dD1FAFtC_Hs6WmIGjmE8qRwBWJK",
+                "트램펄린 타기": "https://lh3.googleusercontent.com/d/1raC7mBc5yB6c4jqKRV2_iv_pDnp0DRAB",
+                "쇼핑해요": "https://lh3.googleusercontent.com/d/1PbfxsihMoJcCWaaLKTRzin2UE0uJ2fgB"
+            }
+        };
+
+        const baseWhatItems = [
+            { text: "공을 던져요", label: "공던지기" },
+            { text: "공을 차요", label: "공차기" },
+            { text: "과자를 먹어요", label: "과자 먹기" },
+            { text: "그림을 그려요", label: "그림 그리기" },
+            { text: "노래를 불러요", label: "노래 부르기" },
+            { text: "물을 마셔요", label: "물 마시기" },
+            { text: "밥을 먹어요", label: "밥 먹기" },
+            { text: "손을 씻어요", label: "손 씻기" },
+            { text: "양치를 해요", label: "양치하기" },
+            { text: "옷을 벗어요", label: "옷벗기" },
+            { text: "옷을 입어요", label: "옷입기" },
+            { text: "잠을 자요", label: "잠자기" },
+            { text: "장난감을 정리해요", label: "장난감 정리" },
+            { text: "책을 읽어요", label: "책읽기" },
+            { text: "트램펄린을 타요", label: "트램펄린 타기" },
+            { text: "쇼핑해요", label: "쇼핑해요" }
+        ];
+
+        function getWhatItems(whoItem = slots.who) {
+            let whoLabel = "나";
+            if (whoItem) {
+                whoLabel = typeof whoItem === 'object' ? (whoItem.label || "나") : "나";
+            }
+            const imgSet = WHAT_IMAGES[whoLabel] || WHAT_IMAGES["나"];
+
+            return baseWhatItems.map(item => ({
+                ...item,
+                img: imgSet[item.label] || WHAT_IMAGES["나"][item.label]
+            }));
+        }
+
+        const DATA = {
+            where: [
+                { text: "공원에서", label: "공원", img: "https://lh3.googleusercontent.com/d/1KZtPolXm-5jjOZeBXxVXFIbZKYbM9F7W" },
+                { text: "교실에서", label: "교실", img: "https://lh3.googleusercontent.com/d/1OgFRI3HH5DzZSs99aWNu-MdkFINE-TF3" },
+                { text: "급식실에서", label: "급식실", img: "https://lh3.googleusercontent.com/d/1pcfOA3ggk8zKrY_kFthQD6ipTkJRZbvt" },
+                { text: "놀이터에서", label: "놀이터", img: "https://lh3.googleusercontent.com/d/1FimQjbE7AilSZcRTSPB9RAK-df3LvuLl" },
+                { text: "도서관에서", label: "도서관", img: "https://lh3.googleusercontent.com/d/1SEVAEBKIMomEwC7D-vLgZ-AKEQCa7l6H" },
+                { text: "마트에서", label: "마트", img: "https://lh3.googleusercontent.com/d/1kaBmxZDNZ6SMHAnXS8U_TKOi4kZKbXn2" },
+                { text: "병원에서", label: "병원", img: "https://lh3.googleusercontent.com/d/1jqAoC67n1Ox3TO-aieO6q4tvBxj7SglG" },
+                { text: "센터에서", label: "센터", img: "https://lh3.googleusercontent.com/d/1VAeiZj1Pc9kwZZJzFlPwVyLHihEFkWRB" },
+                { text: "식당에서", label: "식당", img: "https://lh3.googleusercontent.com/d/1DqScM-tLalcdqC4oTh7QtxVo-K7afMAM" },
+                { text: "약국에서", label: "약국", img: "https://lh3.googleusercontent.com/d/1BVc2C4ku9SCA-L1g-EzComePPuhxwe-e" },
+                { text: "주방에서", label: "주방", img: "https://lh3.googleusercontent.com/d/1V1x6VOb7VExvXd_HqpvhKZNkXKf5N-7Z" },
+                { text: "집에서", label: "집", img: "https://lh3.googleusercontent.com/d/15qSwAZSPMG66Uop1C7OFyC8huFTxjtWr" },
+                { text: "체육관에서", label: "체육관", img: "https://lh3.googleusercontent.com/d/1OIN9fyoByZBtrvCntTDyPrML--zpBBYl" },
+                { text: "카페에서", label: "카페", img: "https://lh3.googleusercontent.com/d/1U30z0B_jo5SZEUDj43M4-NO5IB2w0klV" },
+                { text: "키즈카페에서", label: "키즈카페", img: "https://lh3.googleusercontent.com/d/1W2eu7EK_bbDPCn2_OR0GOjDzCojjkS9B" },
+                { text: "화장실에서", label: "화장실", img: "https://lh3.googleusercontent.com/d/108V41Cyj-9gRK1CLs6TKKwhmwagdfmOS" }
+            ],
+            who: [
+                { text: "내가", label: "나", img: "https://lh3.googleusercontent.com/d/1jsmzKUCph72kJE82Et1W1UO_9YNmkGoX" },
+                { text: "동생이", label: "동생", img: "https://lh3.googleusercontent.com/d/19nsmoB8lIxCqviVskWTmJ7n43MYxRDHG" },
+                { text: "아빠가", label: "아빠", img: "https://lh3.googleusercontent.com/d/1ID0QZcs5du4HiJPr_P90ZDmzfy-Tzp6g" },
+                { text: "엄마가", label: "엄마", img: "https://lh3.googleusercontent.com/d/1L9At_XUOh8U-cPcvKODRONlOzkno-85n" },
+                { text: "할머니가", label: "할머니", img: "https://lh3.googleusercontent.com/d/1-za34Q1dg8ykM9ZMxyjOdu3i7Gokp99J" },
+                { text: "할아버지가", label: "할아버지", img: "https://lh3.googleusercontent.com/d/1dKxvoWrgG8yOTXEK4iyCIcUJWGwZPC9n" }
+            ],
+            what: getWhatItems()
+        };
+
+        function getItemText(item) {
+            if (!item) return '';
+            return typeof item === 'string' ? item : item.text;
+        }
+
+        function getItemImg(item) {
+            if (!item) return null;
+            return (typeof item === 'object' && item.img) ? item.img : null;
+        }
+
+        window.onload = function() {
+            initDateHeader();
+            initCalendar();
+            selectCategory('where');
+            updateSlotDisplays();
+        };
+
+        function startLearningView() {
+            document.getElementById('topHeader').classList.add('hidden');
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('learningScreen').classList.remove('hidden');
+            playAudioBeep(523.25, 0.08);
+        }
+
+        function goBackToStart() {
+            document.getElementById('topHeader').classList.remove('hidden');
+            document.getElementById('learningScreen').classList.add('hidden');
+            document.getElementById('startScreen').classList.remove('hidden');
+            playAudioBeep(330, 0.08);
+        }
+
+        function initDateHeader() {
+            renderDateText();
+        }
+
+        function renderDateText() {
+            const month = todayDateObj.getMonth() + 1;
+            const date = todayDateObj.getDate();
+            const days = ['일', '월', '화', '수', '목', '금', '토'];
+            const dayName = days[todayDateObj.getDay()];
+
+            const dateDisplay = document.getElementById('dateTextDisplay');
+            dateDisplay.innerHTML = `
+                <button onclick="toggleDatePart('month')" class="px-4 sm:px-7 py-2 sm:py-3 bg-white border-2 border-amber-400 rounded-2xl hover:bg-amber-100 transition shadow-xs text-amber-900 cursor-pointer min-w-[65px] sm:min-w-[95px] text-3xl sm:text-5xl md:text-6xl font-bold">
+                    ${dateState.month ? month : '&nbsp;&nbsp;'}
+                </button><span class="text-3xl sm:text-5xl md:text-6xl font-bold text-amber-950">월</span>
+                <button onclick="toggleDatePart('date')" class="px-4 sm:px-7 py-2 sm:py-3 bg-white border-2 border-amber-400 rounded-2xl hover:bg-amber-100 transition shadow-xs text-amber-900 cursor-pointer min-w-[65px] sm:min-w-[95px] text-3xl sm:text-5xl md:text-6xl font-bold">
+                    ${dateState.date ? date : '&nbsp;&nbsp;'}
+                </button><span class="text-3xl sm:text-5xl md:text-6xl font-bold text-amber-950">일</span>
+                <button onclick="toggleDatePart('day')" class="px-4 sm:px-7 py-2 sm:py-3 bg-white border-2 border-amber-400 rounded-2xl hover:bg-amber-100 transition shadow-xs text-amber-900 cursor-pointer min-w-[65px] sm:min-w-[95px] text-3xl sm:text-5xl md:text-6xl font-bold">
+                    ${dateState.day ? dayName : '&nbsp;&nbsp;'}
+                </button><span class="text-3xl sm:text-5xl md:text-6xl font-bold text-amber-950">요일</span>
+            `;
+        }
+
+        function toggleDatePart(part) {
+            dateState[part] = !dateState[part];
+            renderDateText();
+            playAudioBeep(440, 0.05);
+        }
+
+        function initCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = '';
+
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            const currentDayIndex = todayDateObj.getDay();
+
+            const sundayDate = new Date(todayDateObj);
+            sundayDate.setDate(todayDateObj.getDate() - currentDayIndex);
+
+            for (let i = 0; i < 7; i++) {
+                const dayDate = new Date(sundayDate);
+                dayDate.setDate(sundayDate.getDate() + i);
+
+                const isToday = (dayDate.toDateString() === todayDateObj.toDateString());
+
+                const cell = document.createElement('div');
+                cell.className = `flex flex-col bg-slate-50 border rounded-xl overflow-hidden ${
+                    isToday ? 'border-4 border-red-500 font-bold bg-red-50/20 shadow-xs' : 'border-slate-200'
+                }`;
+
+                const dayHeader = document.createElement('div');
+                let dayTextColor = 'text-slate-800';
+                if (i === 0) dayTextColor = 'text-red-600 bg-red-100/60';
+                else if (i === 6) dayTextColor = 'text-blue-600 bg-blue-100/60';
+                else dayHeader.className = 'bg-slate-200/70';
+
+                dayHeader.className = `py-1.5 text-base sm:text-lg md:text-xl font-extrabold ${dayTextColor} border-b border-slate-200`;
+                dayHeader.innerText = `${dayNames[i]}요일`;
+
+                const dateBody = document.createElement('div');
+                dateBody.className = `py-2 text-lg sm:text-2xl md:text-3xl font-bold font-sans ${
+                    isToday ? 'text-red-700 font-extrabold' : 'text-slate-700'
+                }`;
+                dateBody.innerText = `${dayDate.getDate()}일`;
+
+                cell.appendChild(dayHeader);
+                cell.appendChild(dateBody);
+                calendarGrid.appendChild(cell);
+            }
+        }
+
+        function toggleCombinedView() {
+            isCombinedView = !isCombinedView;
+            
+            const btn = document.getElementById('combineToggleBtn');
+            const btnText = document.getElementById('combineToggleText');
+            const separateContainer = document.getElementById('separateSlotsContainer');
+            const combinedContainer = document.getElementById('combinedSlotContainer');
+
+            if (isCombinedView) {
+                btn.className = "text-xs sm:text-sm font-sans font-bold bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-xl transition shadow-xs flex items-center gap-1 cursor-pointer";
+                btnText.innerText = "나눠서 보기";
+                separateContainer.classList.add('hidden');
+                combinedContainer.classList.remove('hidden');
+            } else {
+                btn.className = "text-xs sm:text-sm font-sans font-bold bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl transition shadow-xs flex items-center gap-1 cursor-pointer";
+                btnText.innerText = "합쳐서 보기";
+                combinedContainer.classList.add('hidden');
+                separateContainer.classList.remove('hidden');
+            }
+
+            updateSlotDisplays();
+            playAudioBeep(493.88, 0.08);
+        }
+
+        function selectCategory(cat) {
+            activeCategory = cat;
+
+            const tabs = {
+                where: { el: document.getElementById('tab-where'), opacity: cat === 'where' ? 'opacity-100' : 'opacity-60' },
+                who: { el: document.getElementById('tab-who'), opacity: cat === 'who' ? 'opacity-100' : 'opacity-60' },
+                what: { el: document.getElementById('tab-what'), opacity: cat === 'what' ? 'opacity-100' : 'opacity-60' }
+            };
+
+            for (let key in tabs) {
+                tabs[key].el.className = tabs[key].el.className.replace(/opacity-\d+/, tabs[key].opacity);
+            }
+
+            renderCardList();
+        }
+
+        function renderCardList() {
+            const cardList = document.getElementById('cardList');
+            cardList.innerHTML = '';
+
+            const items = (activeCategory === 'what') ? getWhatItems() : DATA[activeCategory];
+            const colorClasses = {
+                where: 'bg-white hover:bg-sky-50 border-sky-300 text-sky-900',
+                who: 'bg-white hover:bg-amber-50 border-amber-300 text-amber-900',
+                what: 'bg-white hover:bg-pink-50 border-pink-300 text-pink-900'
+            };
+
+            items.forEach(item => {
+                const text = getItemText(item);
+                const img = getItemImg(item);
+
+                const card = document.createElement('button');
+                card.className = `p-2 sm:p-3 rounded-xl border-2 font-jua text-center shadow-xs transition-all transform active:scale-95 flex flex-col items-center justify-center min-h-[220px] sm:min-h-[250px] cursor-pointer ${colorClasses[activeCategory]}`;
+                
+                if (img) {
+                    card.innerHTML = `
+                        <img src="${img}" alt="${text}" class="w-[180px] h-[180px] object-contain mb-1 rounded-md" onerror="this.style.display='none'">
+                        <span class="text-lg sm:text-2xl">${text}</span>
+                    `;
+                } else {
+                    card.innerHTML = `<span class="text-lg sm:text-2xl">${text}</span>`;
+                }
+
+                card.onclick = () => selectCard(activeCategory, item);
+                cardList.appendChild(card);
+            });
+        }
+
+        function selectCard(category, item) {
+            slots[category] = item;
+            if (category === 'who') {
+                if (slots.what) {
+                    const whatItems = getWhatItems(item);
+                    const updatedWhat = whatItems.find(w => w.label === slots.what.label || w.text === slots.what.text);
+                    if (updatedWhat) {
+                        slots.what = updatedWhat;
+                    }
+                }
+                if (activeCategory === 'what') {
+                    renderCardList();
+                }
+            }
+            updateSlotDisplays();
+            playAudioBeep(523.25, 0.08);
+
+            // Trigger celebration confetti if all 3 slots are selected
+            if (slots.where && slots.who && slots.what && typeof confetti === 'function') {
+                confetti({
+                    particleCount: 40,
+                    spread: 60,
+                    origin: { y: 0.8 }
+                });
+            }
+        }
+
+        function clearSlot(category) {
+            if (slots[category]) {
+                slots[category] = null;
+                updateSlotDisplays();
+                playAudioBeep(330, 0.08);
+            }
+        }
+
+        function resetAllSlots() {
+            slots.where = null;
+            slots.who = null;
+            slots.what = null;
+            updateSlotDisplays();
+            playAudioBeep(261.63, 0.1);
+        }
+
+        function updateSlotDisplays() {
+            const updateSingleSlot = (cat, defaultText) => {
+                const textEl = document.getElementById(`text-${cat}`);
+                const slotEl = document.getElementById(`slot-${cat}`);
+
+                if (slots[cat]) {
+                    const text = getItemText(slots[cat]);
+                    const img = getItemImg(slots[cat]);
+
+                    if (img) {
+                        textEl.innerHTML = `
+                            <div class="flex flex-col items-center justify-center gap-1">
+                                <img src="${img}" alt="${text}" class="w-[180px] h-[180px] object-contain rounded-md" onerror="this.style.display='none'">
+                                <span>${text}</span>
+                            </div>
+                        `;
+                    } else {
+                        textEl.innerText = text;
+                    }
+
+                    textEl.classList.add('card-placed');
+                    slotEl.classList.remove('border-dashed');
+                    slotEl.classList.add('border-solid', 'bg-white');
+                } else {
+                    textEl.innerText = defaultText;
+                    textEl.classList.remove('card-placed');
+                    slotEl.classList.add('border-dashed');
+                    slotEl.classList.remove('border-solid', 'bg-white');
+                }
+            };
+
+            updateSingleSlot('where', '[ 어디서 ]');
+            updateSingleSlot('who', '[ 누가 ]');
+            updateSingleSlot('what', '[ 무엇을 ]');
+
+            updateCombinedSlotDisplay();
+            updateSentencePreview();
+        }
+
+        function updateCombinedSlotDisplay() {
+            const container = document.getElementById('combinedContent');
+            const whereImg = getItemImg(slots.where);
+            const whereText = getItemText(slots.where);
+            const whatImg = getItemImg(slots.what);
+            const whatText = getItemText(slots.what);
+
+            if (!slots.where && !slots.what) {
+                container.innerHTML = `
+                    <div class="text-slate-400 font-jua text-2xl py-12">
+                        [ '어디서' 카드가 배경이 되고, '무엇을' 카드가 앞에 합성되어 보여집니다 ]
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center gap-4">
+                    <div id="exportableImageArea" class="relative w-[400px] h-[400px] max-w-full aspect-square border-2 border-slate-300 rounded-2xl overflow-hidden flex items-center justify-center bg-slate-100 shadow-md">
+                        ${whereImg ? `
+                            <img src="${whereImg}" alt="${whereText}" class="absolute inset-0 w-[400px] h-[400px] max-w-full max-h-full object-cover opacity-75">
+                        ` : `
+                            <div class="absolute inset-0 flex items-center justify-center text-slate-400 font-jua text-lg bg-slate-200/50">
+                                [ '어디서' 배경 없음 ]
+                            </div>
+                        `}
+
+                        ${whatImg ? `
+                            <img src="${whatImg}" alt="${whatText}" class="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 w-[300px] h-[300px] max-w-[90%] max-h-[80%] object-contain drop-shadow-md">
+                        ` : `
+                            <div class="relative z-20 text-lg sm:text-xl font-jua text-slate-500 bg-white/80 px-4 py-2 rounded-xl border border-slate-300 shadow-xs">
+                                [ '무엇을' 카드를 선택하세요 ]
+                            </div>
+                        `}
+                    </div>
+
+                    <button onclick="downloadCombinedImage()" class="text-base sm:text-lg font-jua bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl transition shadow-md flex items-center gap-2 cursor-pointer active:scale-95">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                        </svg>
+                        <span>완성된 그림 PNG 다운로드</span>
+                    </button>
+                </div>
+            `;
+        }
+
+        async function downloadCombinedImage() {
+            const whereImgUrl = getItemImg(slots.where);
+            const whatImgUrl = getItemImg(slots.what);
+
+            if (!whereImgUrl && !whatImgUrl) {
+                showToastNotification("저장할 그림이 없습니다. 카드를 먼저 선택해 주세요.");
+                return;
+            }
+
+            let targetEl = document.getElementById('exportableImageArea');
+            let tempContainer = null;
+
+            if (!targetEl) {
+                tempContainer = document.createElement('div');
+                tempContainer.style.position = 'fixed';
+                tempContainer.style.left = '-9999px';
+                tempContainer.style.top = '-9999px';
+                tempContainer.style.width = '400px';
+                tempContainer.style.height = '400px';
+                tempContainer.style.overflow = 'hidden';
+                tempContainer.style.borderRadius = '16px';
+                tempContainer.style.backgroundColor = '#f1f5f9';
+
+                tempContainer.innerHTML = `
+                    <div style="position:relative; width:400px; height:400px;">
+                        ${whereImgUrl ? `<img src="${whereImgUrl}" crossorigin="anonymous" style="position:absolute; inset:0; width:400px; height:400px; object-fit:cover; opacity:0.75;">` : ''}
+                        ${whatImgUrl ? `<img src="${whatImgUrl}" crossorigin="anonymous" style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); z-index:10; width:300px; height:300px; object-fit:contain;">` : ''}
+                    </div>
+                `;
+                document.body.appendChild(tempContainer);
+                targetEl = tempContainer;
+            }
+
+            try {
+                const canvas = await html2canvas(targetEl, {
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#f8fafc',
+                    width: 400,
+                    height: 400,
+                    scale: 2
+                });
+
+                const imageUri = canvas.toDataURL("image/png");
+                const link = document.createElement('a');
+                const whereName = getItemText(slots.where) || '어디서';
+                const whatName = getItemText(slots.what) || '무엇을';
+                
+                link.download = `육하원칙_${whereName}_${whatName}.png`;
+                link.href = imageUri;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                playAudioBeep(659.25, 0.1);
+            } catch (err) {
+                console.error("PNG 저장 중 오류 발생:", err);
+                fallbackCanvasDownload(whereImgUrl, whatImgUrl);
+            } finally {
+                if (tempContainer) {
+                    document.body.removeChild(tempContainer);
+                }
+            }
+        }
+
+        function fallbackCanvasDownload(whereUrl, whatUrl) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 800;
+            const ctx = canvas.getContext('2d');
+
+            ctx.fillStyle = "#f8fafc";
+            ctx.fillRect(0, 0, 800, 800);
+
+            let loaded = 0;
+            const checkDone = () => {
+                loaded++;
+                if (loaded >= 2) {
+                    const link = document.createElement('a');
+                    link.download = `육하원칙_그림.png`;
+                    link.href = canvas.toDataURL("image/png");
+                    link.click();
+                }
+            };
+
+            const imgWhere = new Image();
+            const imgWhat = new Image();
+            imgWhere.crossOrigin = "anonymous";
+            imgWhat.crossOrigin = "anonymous";
+
+            imgWhere.onload = () => { 
+                ctx.globalAlpha = 0.75;
+                ctx.drawImage(imgWhere, 0, 0, 800, 800); 
+                ctx.globalAlpha = 1.0;
+                checkDone(); 
+            };
+            imgWhere.onerror = checkDone;
+
+            imgWhat.onload = () => { 
+                ctx.drawImage(imgWhat, 80, 140, 640, 640); 
+                checkDone(); 
+            };
+            imgWhat.onerror = checkDone;
+
+            imgWhere.src = whereUrl || '';
+            imgWhat.src = whatUrl || '';
+        }
+
+        function showToastNotification(msg) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-800 text-white font-jua px-5 py-3 rounded-xl shadow-xl z-50 transition-opacity duration-300';
+            toast.innerText = msg;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) document.body.removeChild(toast);
+                }, 300);
+            }, 2000);
+        }
+
+        function updateSentencePreview() {
+            const previewEl = document.getElementById('sentencePreview');
+            const speakerBtn = document.getElementById('speakerBtn');
+
+            const where = getItemText(slots.where) || '______';
+            const who = getItemText(slots.who) || '______';
+            const what = getItemText(slots.what) || '______';
+
+            if (slots.where && slots.who && slots.what) {
+                previewEl.innerText = `${where} ${who} ${what}.`;
+                previewEl.className = "text-xl sm:text-3xl font-jua text-indigo-800 font-bold tracking-wide";
+
+                speakerBtn.disabled = false;
+                speakerBtn.className = "p-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full transition shadow-md cursor-pointer transform active:scale-95 animate-bounce";
+            } else {
+                previewEl.innerText = `${where} ${who} ${what}`;
+                previewEl.className = "text-lg sm:text-2xl font-jua text-slate-400 tracking-wide";
+
+                speakerBtn.disabled = true;
+                speakerBtn.className = "p-2.5 bg-slate-200 text-slate-400 rounded-full transition shadow-xs flex items-center justify-center opacity-50 cursor-not-allowed";
+            }
+        }
+
+        function readCompletedSentence() {
+            if (slots.where && slots.who && slots.what) {
+                const fullSentence = `${getItemText(slots.where)} ${getItemText(slots.who)} ${getItemText(slots.what)}`;
+                speakText(fullSentence);
+            }
+        }
+
+        function playAudioBeep(freq, duration) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ko-KR';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function openPdfModal() {
+            generateWorksheetContent();
+            document.getElementById('pdfModal').classList.remove('hidden');
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdfModal').classList.add('hidden');
+        }
+
+        function generateWorksheetContent() {
+            const worksheet = document.getElementById('worksheetContent');
+            worksheet.innerHTML = '';
+
+            // Generate 3 unique sets of (where, who, what)
+            const sets = [];
+            for (let i = 0; i < 3; i++) {
+                let w = (i === 0 && slots.where) ? slots.where : getRandomItem(DATA.where);
+                let wh = (i === 0 && slots.who) ? slots.who : getRandomItem(DATA.who);
+                let baseWt = (i === 0 && slots.what) ? slots.what : getRandomItem(baseWhatItems);
+                let whatListForWh = getWhatItems(wh);
+                let wt = whatListForWh.find(item => item.label === baseWt.label) || baseWt;
+
+                sets.push({ w, wh, wt });
+            }
+
+            // 1. TOP SECTION: 3 COMBINED PICTURES (1:1 ASPECT RATIO)
+            const topSection = document.createElement('div');
+            topSection.className = "border border-amber-300 bg-amber-50/50 rounded-xl p-2.5 mb-2";
+
+            const topCardsHtml = sets.map((s, idx) => {
+                const wImg = getItemImg(s.w);
+                const wtImg = getItemImg(s.wt);
+                const wText = getItemText(s.w);
+                const wtText = getItemText(s.wt);
+
+                return `
+                    <div class="border border-amber-300 bg-white rounded-lg p-2 flex flex-col items-center">
+                        <div class="font-jua text-xs sm:text-sm font-bold text-amber-900 mb-1.5">[ 그림 ${idx + 1} ]</div>
+                        <div class="print-combined-box w-full aspect-square rounded-lg border border-slate-200 bg-slate-100 overflow-hidden flex items-center justify-center relative">
+                            ${wImg ? `<img src="${wImg}" alt="${wText}" class="absolute inset-0 w-full h-full object-cover opacity-75">` : ''}
+                            ${wtImg ? `<img src="${wtImg}" alt="${wtText}" class="absolute bottom-1 left-1/2 -translate-x-1/2 z-10 w-[88%] h-[88%] object-contain drop-shadow-sm">` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            topSection.innerHTML = `
+                <div class="font-jua text-sm font-bold text-amber-950 mb-1.5 flex justify-between items-center">
+                    <span>그림 1~3</span>
+                    <span class="text-xs font-sans text-amber-800 font-normal">그림을 보고 아래의 육하원칙 요소를 확인해 보세요</span>
+                </div>
+                <div class="grid grid-cols-3 print-grid-3 gap-2">
+                    ${topCardsHtml}
+                </div>
+            `;
+            worksheet.appendChild(topSection);
+
+            // 2. BOTTOM SECTION: 3 MATCHING PROBLEMS (WHERE, WHO, WHAT) - 1:1 RATIO MATCHING TOP WIDTH
+            sets.forEach((s, idx) => {
+                const wText = getItemText(s.w);
+                const whText = getItemText(s.wh);
+                const wtText = getItemText(s.wt);
+
+                const wImg = getItemImg(s.w);
+                const whImg = getItemImg(s.wh);
+                const wtImg = getItemImg(s.wt);
+
+                const taskBox = document.createElement('div');
+                taskBox.className = "print-task-box border border-slate-300 rounded-lg p-2.5 bg-slate-50/40";
+
+                const whereCardHtml = `
+                    <div class="border border-sky-400 bg-sky-50/70 p-2 rounded-lg text-sky-900 flex flex-col items-center justify-between w-full h-full">
+                        <span class="font-bold text-xs sm:text-sm mb-1">어디서: ${wText}</span>
+                        ${wImg ? `
+                            <div class="print-card-box w-[140px] h-[140px] flex items-center justify-center p-1 bg-white rounded-lg border border-sky-200 overflow-hidden mx-auto">
+                                <img src="${wImg}" class="print-card-img w-full h-full object-contain rounded" onerror="this.style.display='none'">
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                const whoCardHtml = `
+                    <div class="border border-amber-400 bg-amber-50/70 p-2 rounded-lg text-amber-900 flex flex-col items-center justify-between w-full h-full">
+                        <span class="font-bold text-xs sm:text-sm mb-1">누가: ${whText}</span>
+                        ${whImg ? `
+                            <div class="print-card-box w-[140px] h-[140px] flex items-center justify-center p-1 bg-white rounded-lg border border-amber-200 overflow-hidden mx-auto">
+                                <img src="${whImg}" class="print-card-img w-full h-full object-contain rounded" onerror="this.style.display='none'">
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                const whatCardHtml = `
+                    <div class="border border-pink-400 bg-pink-50/70 p-2 rounded-lg text-pink-900 flex flex-col items-center justify-between w-full h-full">
+                        <span class="font-bold text-xs sm:text-sm mb-1">무엇을: ${wtText}</span>
+                        ${wtImg ? `
+                            <div class="print-card-box w-[140px] h-[140px] flex items-center justify-center p-1 bg-white rounded-lg border border-pink-200 overflow-hidden mx-auto">
+                                <img src="${wtImg}" class="print-card-img w-full h-full object-contain rounded" onerror="this.style.display='none'">
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                taskBox.innerHTML = `
+                    <div class="flex flex-col gap-1.5">
+                        <div class="font-jua text-xs sm:text-sm text-slate-800 font-bold border-b border-slate-200 pb-0.5 flex justify-between items-center">
+                            <span>[그림${idx + 1}]</span>
+                        </div>
+                        <div class="grid grid-cols-3 print-grid-3 gap-2 text-center font-jua items-stretch">
+                            ${whereCardHtml}
+                            ${whoCardHtml}
+                            ${whatCardHtml}
+                        </div>
+                    </div>
+                `;
+                worksheet.appendChild(taskBox);
+            });
+        }
+
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function triggerPrint() {
+            window.print();
+        }
+    </script>
+</body>
+</html>
